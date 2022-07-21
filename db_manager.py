@@ -18,4 +18,12 @@ def get_database():
     client = MongoClient(CONNECTION_STRING)
 
     # Create the database and return it
-    return client.boxes
+    boxes_db = client.boxes
+    boxes_indexes_dict = boxes_db.boxes.index_information()
+    if 'category_index' not in boxes_indexes_dict:
+        boxes_db.boxes.create_index('category', name='category_index')
+    
+    if 'created_at_index' not in boxes_indexes_dict:
+       boxes_db.boxes.create_index('created_at', name='created_at_index')
+
+    return boxes_db

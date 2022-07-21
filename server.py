@@ -1,4 +1,6 @@
 import asyncio
+import logging
+import pytz
 from datetime import datetime
 from db import (
     DatabaseServiceBase,
@@ -15,7 +17,9 @@ from typing import AsyncIterator
 
 from db_manager import get_database
 from dataclasses import asdict
+from pymongo.errors import DuplicateKeyError
 
+log = logging.getLogger(__name__)
 boxes_db = get_database()
 
 
@@ -51,20 +55,41 @@ class DatabaseService(DatabaseServiceBase):
         if not box.created_at:
             box.created_at = datetime.utcnow()
         data = asdict(box, dict_factory=box_to_dict)
-        _ = boxes_db.boxes.insert_one(data)
-        return CreateBoxResponse(status=RequestStatus.OK)
+        status = RequestStatus.OK
+        try:
+            _ = boxes_db.boxes.insert_one(data)
+        except DuplicateKeyError as exc:
+            log.error(f"DuplicateKeyError exception: data={str(data)}, errmsg={str(exc.details)}")
+            status = RequestStatus.ERROR
+        return CreateBoxResponse(status=status)
 
     async def update_box(self, box: "Box") -> "UpdateBoxResponse":
-        _ = boxes_db.boxes.update_one(asdict(box, dict_factory=box_to_dict))
-        return UpdateBoxResponse(status=RequestStatus.OK)
+        new_box_dict = asdict(box, dict_factory=box_to_dict)
+        _update_result = boxes_db.boxes.update_one(
+            {
+                "_id": box.id
+            }, 
+            {
+                "$set": new_box_dict
+            }
+        )
+        if _update_result.modified_count:
+            status = RequestStatus.OK
+        else:
+            status = RequestStatus.ERROR
+        return UpdateBoxResponse(status=status)
 
     async def delete_box(self, id: int) -> "DeleteBoxResponse":
-        _ = boxes_db.boxes.delete_one({"_id": id})
-        return DeleteBoxResponse(status=RequestStatus.OK)
+        _delete_result = boxes_db.boxes.delete_one({"_id": id})
+        if _delete_result.deleted_count:
+            status = RequestStatus.OK
+        else:
+            status = RequestStatus.ERROR
+        return DeleteBoxResponse(status=status)
 
     async def get_boxes_in_category(self, category: str) -> "GetBoxesResponse":
         boxes = boxes_db.boxes.find({"category": category})
-        list_of_boxes = [Box(**box) for box in boxes]
+        list_of_boxes = [dict_to_box(box) for box in boxes]
         return GetBoxesResponse(box=list_of_boxes, status=RequestStatus.OK)
 
     async def get_boxes_in_time_range(
@@ -73,7 +98,7 @@ class DatabaseService(DatabaseServiceBase):
         boxes = boxes_db.boxes.find(
             {"created_at": {"$gte": start_time, "$lte": end_time}}
         )
-        list_of_boxes = [Box(**box) for box in boxes]
+        list_of_boxes = [dict_to_box(box) for box in boxes]
         return GetBoxesResponse(box=list_of_boxes, status=RequestStatus.OK)
 
 

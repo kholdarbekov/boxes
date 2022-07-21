@@ -23,7 +23,8 @@ class Box(betterproto.Message):
     description: str = betterproto.string_field(4)
     category: str = betterproto.string_field(5)
     quantity: int = betterproto.int32_field(6)
-    created_at: datetime = betterproto.message_field(7)
+    # If not sent upon creation then utcnow() will be used
+    created_at: datetime = betterproto.message_field(7, optional=True)
 
 
 @dataclass(eq=False, repr=False)

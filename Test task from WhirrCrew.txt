@@ -1,0 +1,29 @@
+Dear candidate!
+
+Thank you for applying on our position and for your resume.
+
+Before we can move forward, please, proceed with a test task. We don't have deadlines, but it would be great if you make it ASAP. 
+
+After you share the results, based on your results, we will set up an interview. 
+
+
+The TASK:
+
+Create basic database microservice to connect to MongoDB database.
+Use provided GRPC proto file as specification for API.
+Use any libraries that you want for GRPC I would recommend python-betterproto (prerelase version) and grpclib.
+Microservice itself should load all required parameters from environmental variables.
+Database should be designed mainly for fast selections rather than inserts.
+Code should follow standard style guides and should contain type hints. If you need, we can provide a blank MongoDB database for testing purposes.
+You can find a blank MongoDB database for testing purposes here: mongodb://root:7TJj3gEi5y5@13.74.35.181:27018
+
+PS: You should deploy sharing source code enough (e.g. github)
+
+
+Please share your result via GitHub with:
+Oksana Tugaeva - oksana@whirrcrew.com
+Vlad Cohen - vlad.cohen@whirrcrew.com
+Šárka Pospíšilová - sarka.pospisilova@bluedynamic.cz
+
+We wish you good luck!!!
+Waiting for the results!

@@ -6,7 +6,9 @@ DB_USER_PASSWORD = os.environ.get("DB_USER_PASSWORD")
 DB_HOST = os.environ.get("DB_HOST")
 DB_PORT = os.environ.get("DB_PORT")
 
+
 def get_database():
+
     if DB_USERNAME and DB_USER_PASSWORD and DB_HOST and DB_PORT:
         CONNECTION_STRING = f"mongodb://{DB_USERNAME}:{DB_USER_PASSWORD}@{DB_HOST}:{DB_PORT}"
     else:

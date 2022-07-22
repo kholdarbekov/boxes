@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>List of Boxes</title>
+</head>
+<body>
+    <h1>List of boxes</h1>
+    <ul>
+    {% for box in boxes %}
+        <li>{{ box.name }}</li>
+    {% endfor %}
+    </ul>
+</body>

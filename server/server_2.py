@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import pytz
 from datetime import datetime
 from db import (
     DatabaseServiceBase,
@@ -15,9 +14,12 @@ from db import (
 from grpclib.server import Server
 from typing import AsyncIterator
 
-from db_manager import get_database
 from dataclasses import asdict
 from pymongo.errors import DuplicateKeyError
+from dotenv import load_dotenv
+
+load_dotenv()
+from db_manager import get_database
 
 log = logging.getLogger(__name__)
 boxes_db = get_database()

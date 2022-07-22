@@ -1,6 +1,5 @@
 import asyncio
 import db
-import pytz
 from datetime import datetime
 from grpclib.client import Channel
 

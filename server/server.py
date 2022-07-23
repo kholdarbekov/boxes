@@ -2,6 +2,7 @@ import os
 import asyncio
 import logging
 from datetime import datetime
+
 from db import (
     DatabaseServiceBase,
     GetBoxResponse,
@@ -18,12 +19,11 @@ from typing import AsyncIterator
 from dataclasses import asdict
 from pymongo.errors import DuplicateKeyError
 from dotenv import load_dotenv
-
-load_dotenv()
 from db_manager import get_database
 
+load_dotenv()
+
 log = logging.getLogger(__name__)
-boxes_db = get_database()
 
 APP_HOST = os.environ.get("APP_HOST")
 APP_PORT = os.environ.get("APP_PORT")
@@ -43,8 +43,12 @@ def dict_to_box(data):
 
 
 class DatabaseService(DatabaseServiceBase):
+    def __init__(self, boxes_db) -> None:
+        self.boxes_db = boxes_db
+        super().__init__()
+
     async def get_box(self, id: int) -> "GetBoxResponse":
-        data = boxes_db.boxes.find_one({"_id": id})
+        data = self.boxes_db.boxes.find_one({"_id": id})
         status = RequestStatus.ERROR
         if data:
             data = dict_to_box(data)
@@ -52,7 +56,7 @@ class DatabaseService(DatabaseServiceBase):
         return GetBoxResponse(box=data, status=status)
 
     async def get_boxes(self) -> "GetBoxesResponse":
-        boxes = boxes_db.boxes.find()
+        boxes = self.boxes_db.boxes.find()
         list_of_boxes = [dict_to_box(box) for box in boxes]
         return GetBoxesResponse(box=list_of_boxes, status=RequestStatus.OK)
 
@@ -62,7 +66,7 @@ class DatabaseService(DatabaseServiceBase):
         data = asdict(box, dict_factory=box_to_dict)
         status = RequestStatus.OK
         try:
-            _ = boxes_db.boxes.insert_one(data)
+            _ = self.boxes_db.boxes.insert_one(data)
         except DuplicateKeyError as exc:
             log.error(
                 f"DuplicateKeyError exception: data={str(data)}, errmsg={str(exc.details)}"
@@ -72,7 +76,7 @@ class DatabaseService(DatabaseServiceBase):
 
     async def update_box(self, box: "Box") -> "UpdateBoxResponse":
         new_box_dict = asdict(box, dict_factory=box_to_dict)
-        _update_result = boxes_db.boxes.update_one(
+        _update_result = self.boxes_db.boxes.update_one(
             {"_id": box.id}, {"$set": new_box_dict}
         )
         if _update_result.modified_count:
@@ -82,7 +86,7 @@ class DatabaseService(DatabaseServiceBase):
         return UpdateBoxResponse(status=status)
 
     async def delete_box(self, id: int) -> "DeleteBoxResponse":
-        _delete_result = boxes_db.boxes.delete_one({"_id": id})
+        _delete_result = self.boxes_db.boxes.delete_one({"_id": id})
         if _delete_result.deleted_count:
             status = RequestStatus.OK
         else:
@@ -90,14 +94,14 @@ class DatabaseService(DatabaseServiceBase):
         return DeleteBoxResponse(status=status)
 
     async def get_boxes_in_category(self, category: str) -> "GetBoxesResponse":
-        boxes = boxes_db.boxes.find({"category": category})
+        boxes = self.boxes_db.boxes.find({"category": category})
         list_of_boxes = [dict_to_box(box) for box in boxes]
         return GetBoxesResponse(box=list_of_boxes, status=RequestStatus.OK)
 
     async def get_boxes_in_time_range(
         self, start_time: datetime, end_time: datetime
     ) -> "GetBoxesResponse":
-        boxes = boxes_db.boxes.find(
+        boxes = self.boxes_db.boxes.find(
             {"created_at": {"$gte": start_time, "$lte": end_time}}
         )
         list_of_boxes = [dict_to_box(box) for box in boxes]
@@ -105,7 +109,8 @@ class DatabaseService(DatabaseServiceBase):
 
 
 async def main():
-    server = Server([DatabaseService()])
+    boxes_db = get_database()
+    server = Server([DatabaseService(boxes_db=boxes_db)])
     await server.start(APP_HOST, APP_PORT)
     await server.wait_closed()
 

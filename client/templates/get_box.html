@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Box details</title>
+</head>
+<body>
+    <h1>Box details</h1>
+    <div>Name: {{ box.name }}</div>
+    <div>Id: {{ box.id }}</div>
+    <div>Price: {{ box.price }}</div>
+    <div>Description: {{ box.description }}</div>
+    <div>Category: {{ box.category }}</div>
+    <div>Quantity: {{ box.quantity }}</div>
+    <div>Created_at: {{ box.created_at }}</div>
+    <br>
+    <div><a href="{{ url_for('update_box', id=box.id) }}">Update</a></div>
+    <br>
+    <form action="{{ url_for('delete_box', id=box.id) }}" method="post">
+        <input type="submit" value="Delete">
+    </form>
+</body>

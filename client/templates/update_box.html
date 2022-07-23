@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Update box</title>
+</head>
+<body>
+    <h1>Update box (ID={{ box.id }})</h1>
+
+    <div>Name: {{ box.name }}</div>
+    <div>Price: {{ box.price }}</div>
+    <div>Description: {{ box.description }}</div>
+    <div>Category: {{ box.category }}</div>
+    <div>Quantity: {{ box.quantity }}</div>
+    <div>Created_at: {{ box.created_at }}</div>
+    <br>
+    {% if error %}
+    <span class="label label-danger">{{error}}</span>
+    {% endif %}
+    <br>
+    <form action="{{ url_for('update_box', id=box.id) }}" method="post">
+        <label for="Name">Name</label>
+        <input name="Name" type="text">
+        
+        <label for="Price">Price</label>
+        <input name="Price" type="number" min="0">
+        
+        <label for="Description">Description</label>
+        <input name="Description" type="text">
+
+        <label for="Category">Category</label>
+        <input name="Category" type="text">
+
+        <label for="Quantity">Quantity</label>
+        <input name="Quantity" type="number" min="0">
+
+        <input type="submit" value="Submit">
+    </form>
+
+</body>

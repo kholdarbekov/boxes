@@ -1,3 +1,4 @@
+import os
 import asyncio
 import logging
 from datetime import datetime
@@ -24,6 +25,8 @@ from db_manager import get_database
 log = logging.getLogger(__name__)
 boxes_db = get_database()
 
+APP_HOST = os.environ.get("APP_HOST")
+APP_PORT = os.environ.get("APP_PORT")
 
 def box_to_dict(box_fields):
     # Converts id field to _id
@@ -61,19 +64,16 @@ class DatabaseService(DatabaseServiceBase):
         try:
             _ = boxes_db.boxes.insert_one(data)
         except DuplicateKeyError as exc:
-            log.error(f"DuplicateKeyError exception: data={str(data)}, errmsg={str(exc.details)}")
+            log.error(
+                f"DuplicateKeyError exception: data={str(data)}, errmsg={str(exc.details)}"
+            )
             status = RequestStatus.ERROR
         return CreateBoxResponse(status=status)
 
     async def update_box(self, box: "Box") -> "UpdateBoxResponse":
         new_box_dict = asdict(box, dict_factory=box_to_dict)
         _update_result = boxes_db.boxes.update_one(
-            {
-                "_id": box.id
-            }, 
-            {
-                "$set": new_box_dict
-            }
+            {"_id": box.id}, {"$set": new_box_dict}
         )
         if _update_result.modified_count:
             status = RequestStatus.OK
@@ -106,7 +106,7 @@ class DatabaseService(DatabaseServiceBase):
 
 async def main():
     server = Server([DatabaseService()])
-    await server.start("127.0.0.1", 50051)
+    await server.start(APP_HOST, APP_PORT)
     await server.wait_closed()
 
 

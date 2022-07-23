@@ -7,7 +7,7 @@
     <h1>List of boxes</h1>
     <ul>
     {% for box in boxes %}
-        <li>{{ box.name }}</li>
+        <a href="{{ url_for('get_box', id=box.id) }}"><li>{{ box.name }}</li></a>
     {% endfor %}
     </ul>
 </body>

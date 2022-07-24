@@ -19,9 +19,8 @@ from typing import AsyncIterator
 from dataclasses import asdict
 from pymongo.errors import DuplicateKeyError
 from dotenv import load_dotenv
-from db_manager import get_database
-
 load_dotenv()
+from db_manager import get_database
 
 log = logging.getLogger(__name__)
 

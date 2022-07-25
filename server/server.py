@@ -14,6 +14,7 @@ from db import (
     DeleteBoxResponse,
 )
 from grpclib.server import Server
+from grpclib.utils import graceful_exit
 from typing import AsyncIterator
 
 from dataclasses import asdict
@@ -110,8 +111,9 @@ class DatabaseService(DatabaseServiceBase):
 async def main():
     boxes_db = get_database()
     server = Server([DatabaseService(boxes_db=boxes_db)])
-    await server.start(APP_HOST, APP_PORT)
-    await server.wait_closed()
+    with graceful_exit([server]):
+        await server.start(APP_HOST, APP_PORT)
+        await server.wait_closed()
 
 
 if __name__ == "__main__":
